@@ -17,6 +17,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    //ContentView()
     EngineeringWaveCanvas()
 }
