@@ -88,13 +88,15 @@ struct ApplePeelerCanvasView: View {
                 .padding([.horizontal, .top])
             }
             
+            let path = planner.fullPath
+            
             // 메인 2D 공간 궤적 차트
             Chart {
                 // 1. 전체 사과 모양 원형 궤적선 그리기
-                ForEach(planner.fullPath) { pt in
+                ForEach(path) { pt in
                     LinePlot(x: "X (cm)", y: "Y (cm)") { x in
                         // 원형 상단/하단 보간 매핑
-                        if let match = planner.fullPath.first(where: { abs($0.appleX - x) < 0.2 }) {
+                        if let match = path.first(where: { abs($0.appleX - x) < 0.2 }) {
                             return match.appleY
                         }
                         return 0.0
