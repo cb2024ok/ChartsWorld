@@ -49,11 +49,29 @@ class AIAnomalDetector {
                 self.isAnalyzing = false
             }
         } catch {
-            await MainActor.run {
+            /*await MainActor.run {
                 self.aiGuidance = "로컬 AI 연산 에러: \(error.localizedDescription)"
                 self.isAnalyzing = false
-            }
+            }*/
+            await runRuleBasedDiagnostic(
+                amplitude: amplitude,
+                frequency: frequency
+            )
         }
+    }
+    
+    /// NPU/Apple Intelligence 미지원 기기를 위한 로컬 수학/공학 알고리즘 진단 모드
+    private func runRuleBasedDiagnostic(amplitude: Double, frequency: Double) async {
+            await MainActor.run {
+                self.isAnalyzing = false
+                if frequency > 8.0 {
+                    self.aiGuidance = "⚠️ [Rule Engine] 고주파 영역 진입: 모터 탈조 및 과열 위험이 높습니다."
+                } else if amplitude > 2.5 {
+                    self.aiGuidance = "⚠️ [Rule Engine] 과도 진폭: 기계적 진동으로 인한 스텝 손실에 주의하세요."
+                } else {
+                    self.aiGuidance = "✅ [Rule Engine] 시스템 응답이 안정적인 제어 범위 내에 있습니다."
+                }
+            }
     }
 }
 
