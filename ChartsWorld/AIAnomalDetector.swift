@@ -57,7 +57,7 @@ class AIAnomalDetector {
     }
 }
 
-struct EngineeringWaveCanvas: View {
+struct AIAnomalDetectorCanvas: View {
     // 공학 파라미터 (진폭 A, 주파수 w, 위상 phi)
     @State private var amplitude: Double = 1.0
     @State private var frequency: Double = 2.0

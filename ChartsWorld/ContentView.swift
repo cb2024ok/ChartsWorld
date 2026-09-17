@@ -10,12 +10,14 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         VStack {
-            EngineeringWaveCanvas()
+            //EngineeringWaveCanvas()
+            AIAnomalDetectorCanvas()
         }
         .padding()
     }
 }
 
 #Preview {
-    EngineeringWaveCanvas()
+    //EngineeringWaveCanvas()
+    AIAnomalDetectorCanvas()
 }
