@@ -22,12 +22,27 @@ class KinematicsOrchestrator {
     let l2: Double = 150.0
     
     // 조작 가능한 중간 가속 제어점 (Rust의 handle Point 역할)
-    var handleX: Double = 45.0
-    var handleY: Double = 90.0
-    var selectedConfig: ElbowConfig = .up
+    var handleX: Double = 45.0 { didSet { recalculate() } }
+    var handleY: Double = 90.0 { didSet { recalculate() } }
+    var selectedConfig: ElbowConfig = .up { didSet { recalculate() } }
+    
+    // Computed가 아닌 저장 프로퍼티로 전환하여 UI 스레드 연산 분리
+    private(set) var trajectory: [WavePoint] = []
+
+    init() { recalculate() }
+    
+    func recalculate() {
+            // 무거운 연산은 백그라운드 태스크로 분리
+            Task.detached(priority: .userInitiated) {
+                let points = await self.computeTrajectory()
+                await MainActor.run {
+                    self.trajectory = points
+                }
+            }
+        }
     
     // 궤적 생성 (t = 0.0 ... 1.0)
-    var trajectory: [WavePoint] {
+    private func computeTrajectory() -> [WavePoint] {
         let startX: Double = 0.0
         let startY: Double = 0.0
         let endX: Double = 180.0
@@ -96,15 +111,11 @@ struct KinematicsCanvasView: View {
             // 메인 120Hz 렌더링 캔버스 (Swift Charts LinePlot)
             Chart {
                 ForEach(manager.trajectory) { point in
-                    LinePlot(x: "X 궤적", y: "Y 궤적") { x in
-                        // X값에 매핑되는 Y 추적 라인 플롯 생성
-                        if let matched = manager.trajectory.first(where: { abs($0.x - x) < 2.0 }) {
-                            return matched.y
-                        }
-                        return x
-                    }
-                    .foregroundStyle(by: .value("Glow", "Trajectory"))
-                    .interpolationMethod(.catmullRom)
+                    LineMark(
+                            x: .value("X 궤적", point.x),
+                            y: .value("Y 궤적", point.y)
+                        )
+                        .foregroundStyle(.blue)
                 }
             }
             .chartXScale(domain: 0...200)

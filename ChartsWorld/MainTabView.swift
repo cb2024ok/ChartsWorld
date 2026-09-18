@@ -24,7 +24,8 @@ struct MainTabView: View {
 
             // 2. 궤적 계획 & 역운동학(Kinematics) 모듈
             NavigationStack {
-                TrajectoryKinematicsView()
+                //TrajectoryKinematicsView()
+                ApplePeelerCanvasView()
                     .navigationTitle("Trajectory Engine")
                     .navigationBarTitleDisplayMode(.inline)
             }
@@ -35,7 +36,8 @@ struct MainTabView: View {
 
             // 3. ESP32 / MCU 하드웨어 직접 통신 모듈
             NavigationStack {
-                HardwareBridgeView()
+                //HardwareBridgeView()
+                KinematicsCanvasView()
                     .navigationTitle("MCU Bridge")
                     .navigationBarTitleDisplayMode(.inline)
             }

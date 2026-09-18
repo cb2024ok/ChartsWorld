@@ -23,8 +23,15 @@ class AppleTrajectoryPlanner {
     var totalDuration: Double = 180.0 // 총 가동 시간 (3분)
     var currentTime: Double = 0.0     // 사용자가 조작할 시간 슬라이더 값
     
+    // Computed Property 대신 저장 프로퍼티로 한 번만 계산/보관
+    private(set) var fullPath: [AppleTrackPoint] = []
+    
+    init() {
+            generatePath()
+    }
+    
     // 전체 3분 동안의 궤적 사전 조립 (Rust의 Vec 생성 로직 반영)
-    var fullPath: [AppleTrackPoint] {
+    private func generatePath() {
         let dt = 1.0 // 시각화를 위해 1초 단위 샘플링
         var points: [AppleTrackPoint] = []
         let steps = Int(totalDuration / dt)
@@ -55,12 +62,17 @@ class AppleTrajectoryPlanner {
                 ))
             }
         }
-        return points
+        self.fullPath = points
     }
     
     // 현재 시간(슬라이더 위치)에 매핑되는 관절 데이터 추출
     var currentFrame: AppleTrackPoint? {
-        fullPath.min(by: { abs($0.time - currentTime) < abs($1.time - currentTime) })
+        // 배열 탐색 성능 향상: binary search 또는 단순 index 계산
+            let index = Int(currentTime.clamped(to: 0...totalDuration))
+            if index < fullPath.count {
+                return fullPath[index]
+            }
+        return fullPath.min(by: { abs($0.time - currentTime) < abs($1.time - currentTime) })
     }
 }
 
@@ -92,26 +104,23 @@ struct ApplePeelerCanvasView: View {
             
             // 메인 2D 공간 궤적 차트
             Chart {
-                // 1. 전체 사과 모양 원형 궤적선 그리기
-                ForEach(path) { pt in
-                    LinePlot(x: "X (cm)", y: "Y (cm)") { x in
-                        // 원형 상단/하단 보간 매핑
-                        if let match = path.first(where: { abs($0.appleX - x) < 0.2 }) {
-                            return match.appleY
-                        }
-                        return 0.0
-                    }
-                    .foregroundStyle(.red.opacity(0.3))
+                // 1. 전체 사과 궤적 라인 (Path/LineMark로 한번에 렌더링)
+                ForEach(planner.fullPath) { pt in
+                    LineMark(
+                        x: .value("X (cm)", pt.appleX),
+                        y: .value("Y (cm)", pt.appleY)
+                    )
+                    .foregroundStyle(.red.opacity(0.4))
                 }
                 
-                // 2. 현재 로봇 팔이 물고 있는 타겟 포인트 점 찍기
+                // 2. 현재 타겟 포인트
                 if let current = planner.currentFrame {
                     PointMark(
                         x: .value("Target X", current.appleX),
                         y: .value("Target Y", current.appleY)
                     )
                     .foregroundStyle(.green)
-                    .symbolSize(100)
+                    .symbolSize(120)
                 }
             }
             .chartXScale(domain: 0...20)

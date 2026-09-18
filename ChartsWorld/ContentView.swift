@@ -9,15 +9,16 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
+    
         VStack {
-            //EngineeringWaveCanvas()
-            AIAnomalDetectorCanvas()
+            MainTabView()
+             .padding()
         }
-        .padding()
     }
 }
 
 #Preview {
     //EngineeringWaveCanvas()
-    AIAnomalDetectorCanvas()
+    //AIAnomalDetectorCanvas()
+    MainTabView()
 }
