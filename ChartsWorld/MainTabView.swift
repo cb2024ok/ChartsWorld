@@ -7,6 +7,7 @@ struct MainTabView: View {
         case waveCanvas
         case kinematics
         case hardware
+        case archimedes
     }
 
     var body: some View {
@@ -45,6 +46,17 @@ struct MainTabView: View {
                 Label("하드웨어 제어", systemImage: "cpu")
             }
             .tag(Tab.hardware)
+            
+            // 4. ArchimedesSphereView
+            NavigationStack {
+                GeometricEngineView()
+                    .navigationTitle("GeometricEngineView")
+                    .navigationBarTitleDisplayMode(.inline)
+            }
+            .tabItem {
+                Label("아르키메데스", systemImage: "cube.fill")
+            }
+            .tag(Tab.archimedes)
         }
         .tint(.blue) // 엔지니어링 툴 특유의 차분한 액센트 컬러
     }
